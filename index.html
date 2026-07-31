@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tangkap Bintang</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .game-box {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-top: 0;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 14px 0;
+      font-weight: bold;
+    }
+
+    .card {
+      flex: 1;
+      background: rgba(255,255,255,0.15);
+      padding: 10px;
+      border-radius: 12px;
+    }
+
+    #startBtn {
+      border: none;
+      background: #22c55e;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 14px;
+    }
+
+    #arena {
+      position: relative;
+      width: 100%;
+      height: 360px;
+      background: rgba(255,255,255,0.12);
+      border: 2px solid rgba(255,255,255,0.25);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    #target {
+      position: absolute;
+      width: 72px;
+      height: 72px;
+      border: none;
+      border-radius: 16px;
+      background: #facc15;
+      font-size: 30px;
+      cursor: pointer;
+      display: none;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+    }
+
+    #message {
+      margin-top: 14px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <h1>🎯 Tangkap Bintang</h1>
+    <p>Tekan bintang sebanyak mungkin dalam 20 detik.</p>
+
+    <div class="stats">
+      <div class="card">Skor: <span id="score">0</span></div>
+      <div class="card">Waktu: <span id="time">20</span></div>
+      <div class="card">Best: <span id="best">0</span></div>
+    </div>
+
+    <button id="startBtn" onclick="startGame()">Mulai Game</button>
+
+    <div id="arena">
+      <button id="target" onclick="hit()">⭐</button>
+    </div>
+
+    <div id="message">Tekan tombol "Mulai Game"</div>
+  </div>
+
+  <script>
+    let score = 0;
+    let timeLeft = 20;
+    let playing = false;
+    let timer = null;
+
+    const scoreEl = document.getElementById("score");
+    const timeEl = document.getElementById("time");
+    const bestEl = document.getElementById("best");
+    const messageEl = document.getElementById("message");
+    const arena = document.getElementById("arena");
+    const target = document.getElementById("target");
+
+    let bestScore = Number(localStorage.getItem("bestScore") || 0);
+    bestEl.textContent = bestScore;
+
+    function moveTarget() {
+      const maxX = arena.clientWidth - target.offsetWidth;
+      const maxY = arena.clientHeight - target.offsetHeight;
+
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+
+      target.style.left = x + "px";
+      target.style.top = y + "px";
+    }
+
+    function startGame() {
+      score = 0;
+      timeLeft = 20;
+      playing = true;
+
+      scoreEl.textContent = score;
+      timeEl.textContent = timeLeft;
+      messageEl.textContent = "Ayo, tangkap bintangnya!";
+      target.style.display = "block";
+
+      moveTarget();
+
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft--;
+        timeEl.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          playing = false;
+          target.style.display = "none";
+
+          if (score > bestScore) {
+            bestScore = score;
+            localStorage.setItem("bestScore", bestScore);
+            bestEl.textContent = bestScore;
+          }
+
+          messageEl.textContent = "Waktu habis! Skor kamu: " + score;
+        }
+      }, 1000);
+    }
+
+    function hit() {
+      if (!playing) return;
+      score++;
+      scoreEl.textContent = score;
+      moveTarget();
+    }
+
+    window.addEventListener("resize", () => {
+      if (playing) moveTarget();
+    });
+  </script>
+</body>
+</html>
